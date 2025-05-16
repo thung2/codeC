@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 #include <openssl/evp.h>
 
 #define PORT 8080
@@ -12,9 +12,8 @@
 pthread_mutex_t mutex;
 char buffer[BUFFER_SIZE];
 
-// AES key và IV (hardcoded d? demo)
-unsigned char key[32] = "01234567890123456789012345678901"; // 32 bytes = 256 bit
-unsigned char iv[16]  = "0123456789012345";                 // 16 bytes = 128 bit
+unsigned char key[32] = "01234567890123456789012345678901";
+unsigned char iv[16]  = "0123456789012345";
 
 int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
             unsigned char *iv, unsigned char *ciphertext) {
@@ -37,7 +36,7 @@ void* read_input(void* arg) {
         fgets(buffer, BUFFER_SIZE, stdin);
 
         pthread_mutex_lock(&mutex);
-        buffer[strcspn(buffer, "\n")] = 0; // Xoá newline
+        buffer[strcspn(buffer, "\n")] = 0;
         pthread_mutex_unlock(&mutex);
     }
 }
@@ -54,13 +53,13 @@ void* send_data(void* arg) {
             memset(buffer, 0, BUFFER_SIZE);
         }
         pthread_mutex_unlock(&mutex);
-        usleep(1000);
+        usleep(100000);
     }
 }
 
 int main() {
-    struct sockaddr_in server_addr;
     int sock;
+    struct sockaddr_in server_addr;
     pthread_t input_thread, send_thread;
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -79,7 +78,6 @@ int main() {
     }
 
     pthread_mutex_init(&mutex, NULL);
-
     pthread_create(&input_thread, NULL, read_input, NULL);
     pthread_create(&send_thread, NULL, send_data, (void*)&sock);
 
@@ -90,4 +88,3 @@ int main() {
     close(sock);
     return 0;
 }
-
